@@ -30,47 +30,16 @@
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function parse(html) { return new DOMParser().parseFromString(html, 'text/html'); }
 
-  function busqueda() {
-    var m = clienteKey && matrices[clienteKey];
-    if (!m || !alerta) return { filas: [], metodo: null };
-    return Esc.buscarFilas(m.rows, $('sub').value, alerta.idlookup, alerta.idMatriz, alerta.bunit, alerta.dataCenters, alerta.pistas);
-  }
   function filaActual() {
-    var b = busqueda();
-    if (b.filas.length <= 1) return b.filas[0] || null;
-    var i = parseInt($('opcion').value, 10);
-    return isNaN(i) ? null : b.filas[i];
-  }
-  function pintarOpciones() {
-    var b = busqueda(), sel = $('opcion'), prev = sel.value;
-    var metodos = { matriz: 'Matriz nueva (id_matriz + bunit)', id: 'Por ID Lookup', '*': 'Fila general (*)',
-      pista: 'Regla especial por bunit o cliente', datacenter: 'Por data_center' };
     var m = clienteKey && matrices[clienteKey];
-    var txt = b.metodo ? 'Destinatarios por: ' + metodos[b.metodo] : 'No hay fila en la matriz para esta alerta.';
-    if (m && Esc.tieneMatrizNueva(m.rows) && b.metodo !== 'matriz') {
-      txt += alerta.idMatriz ? ' (no se ubicó id_matriz ' + alerta.idMatriz + ' con ese bunit)' : ' (la alerta no trae id_matriz)';
-    }
-    $('metodo').textContent = txt;
-    if (b.filas.length > 1) {
-      sel.innerHTML = '<option value="">Elige una opción…</option>' + b.filas.map(function (f, i) {
-        return '<option value="' + i + '">' + esc(f.Opcion || Esc.emails(f.Para).join(', ') || ('Opción ' + (i + 1))) + '</option>';
-      }).join('');
-      if (prev && b.filas[prev]) sel.value = prev;
-      $('opcionBox').style.display = 'block';
-    } else {
-      sel.innerHTML = ''; $('opcionBox').style.display = 'none';
-    }
+    if (!m || !alerta) return null;
+    return Esc.pickRow(m.rows, $('sub').value, alerta.idlookup);
   }
 
   function pintarDestinatarios() {
-    pintarOpciones();
     var f = filaActual();
     $('dPara').textContent = f ? Esc.emails(f.Para).join('; ') : '—';
-    $('dCC').textContent = f ? Esc.sinDuplicados(Esc.emails(f.Para), Esc.emails(f.CC)).join('; ') : '—';
-    var ind = Esc.indicaciones(f);
-    $('indic').style.display = ind.length ? 'block' : 'none';
-    $('indic').innerHTML = ind.length ? '<b>Indicaciones de la matriz:</b><ul>' + ind.map(function (x) { return '<li>' + esc(x).replace(/\n/g, '<br>') + '</li>'; }).join('') + '</ul>' : '';
-    if (f && Esc.esSoar(f)) $('dPara').textContent = '(se escala por SOAR, no por correo)';
+    $('dCC').textContent = f ? Esc.emails(f.CC).join('; ') : '—';
   }
 
   function pintarMatrices() {
@@ -97,15 +66,6 @@
       $('aNombre').textContent = alerta.nombre || '(sin nombre)';
       $('aId').textContent = alerta.idlookup || '(sin ID)';
       $('aCliente').textContent = alerta.cliente;
-      var ims = Esc.valoresColumna(doc, 'id_matriz'), bus = Esc.valoresColumna(doc, 'bunit'), dcs = Esc.valoresColumna(doc, 'data_center');
-      alerta.idMatriz = ims[0] || ''; alerta.bunit = bus[0] || '';
-      alerta.dataCenters = dcs; alerta.pistas = bus.concat([alerta.cliente]);
-      var partes = [];
-      if (ims.length) partes.push('id_matriz: ' + ims.join(', '));
-      if (bus.length) partes.push('bunit: ' + bus.join(', '));
-      if (dcs.length) partes.push('data_center: ' + dcs.join(', '));
-      $('aMatriz').style.display = partes.length ? 'block' : 'none';
-      $('aMatriz').textContent = partes.join(' · ') + (ims.length > 1 || bus.length > 1 || dcs.length > 1 ? '  ⚠ la tabla trae varios valores' : '');
       clienteKey = Esc.matrizDe(matrices, alerta.cliente) || Esc.key(alerta.cliente);
       var m = matrices[clienteKey];
       var sel = $('sub'); sel.innerHTML = '';
@@ -136,16 +96,10 @@
     var fila = filaActual();
     if (!analista) errores.push('Configura tu nombre en "Configuración".');
     if (!matrices[clienteKey]) errores.push('No hay matriz cargada para el cliente "' + (alerta && alerta.cliente) + '".');
-    else if (!fila && busqueda().filas.length > 1) errores.push('Elige la opción de destinatarios (por ejemplo Windows o Linux).');
-    else if (!fila) errores.push('La matriz no tiene una fila activa para esta alerta (subcliente "' + $('sub').value + '", ID ' + (alerta.idlookup || '—') + (alerta.idMatriz ? ', id_matriz ' + alerta.idMatriz : '') + (alerta.dataCenters && alerta.dataCenters.length ? ', data_center ' + alerta.dataCenters.join('/') : '') + '). Revisa la matriz o pon los destinatarios a mano.');
+    else if (!fila) errores.push('La matriz no tiene una fila activa para el subcliente "' + $('sub').value + '" (ni para el ID ' + alerta.idlookup + ' ni con *).');
     var oc = Esc.fromInput($('ocurrencia').value);
     if (!oc) errores.push('Falta la fecha y hora de ocurrencia.');
-    var sinDest = false;
-    if (fila && Esc.esSoar(fila)) errores.push('Según la matriz, esta alerta se escala por SOAR, no por correo.');
-    else if (fila && !Esc.emails(fila.Para).length) {
-      sinDest = true;
-      avisos.push('La matriz no tiene correos en "Para" para esta alerta: se llena la plantilla, pero el Para y el CC los pones tú.');
-    }
+    if (fila && !Esc.emails(fila.Para).length) errores.push('La fila de la matriz no tiene correos en "Para".');
     if (errores.length) return resultado(errores);
 
     var caso = Esc.norm($('caso').value);
@@ -171,15 +125,14 @@
       if ($('bordes').checked) Esc.arreglarBordes(doc);
       var nuevo = '<!DOCTYPE html>' + doc.documentElement.outerHTML;
       return setBody(nuevo)
-        .then(function () { if (!sinDest) return setRec('to', Esc.emails(fila.Para)); })
-        .then(function () { if (!sinDest) return setRec('cc', Esc.sinDuplicados(Esc.emails(fila.Para), Esc.emails(fila.CC))); })
+        .then(function () { return setRec('to', Esc.emails(fila.Para)); })
+        .then(function () { return setRec('cc', Esc.emails(fila.CC)); })
         .then(function () {
           if (!$('ajAsunto').checked) return;
           return getSubj().then(function (s) { return setSubj(Esc.armarAsunto(s, caso)); });
         })
         .then(function () {
-          avisos = avisos.concat(Esc.indicaciones(fila).filter(function (x) { return !/^Escalamiento:/.test(x); }));
-          resultado(null, avisos, 'Listo: plantilla' + (sinDest ? '' : ', Para, CC') + ($('ajAsunto').checked ? ' y asunto' : '') + ' llenados. Revisa el correo y dale Enviar.');
+          resultado(null, avisos, 'Listo: plantilla, Para, CC' + ($('ajAsunto').checked ? ' y asunto' : '') + ' llenados. Revisa el correo y dale Enviar.');
         });
     }).catch(function (e) { resultado(['Error al llenar: ' + (e && e.message || e)]); });
   }
@@ -193,7 +146,6 @@
       var avisos = [];
       if (r.faltanPara.length) avisos.push('Faltan en Para: ' + r.faltanPara.join(', '));
       if (r.faltanCC.length) avisos.push('Faltan en CC: ' + r.faltanCC.join(', '));
-      if (r.usuario.length) avisos.push('Correo(s) de usuario agregados en Para (permitido por la matriz): ' + r.usuario.join(', '));
       if (errores.length) resultado(errores, avisos, null, 'No envíes todavía:');
       else resultado(null, avisos, avisos.length ? null : 'Destinatarios correctos según la matriz.');
     }).catch(function (e) { resultado(['No pude leer los destinatarios: ' + (e && e.message || e)]); });
@@ -218,14 +170,14 @@
           else { copia[Esc.key(m.cliente)] = m; cargados.push(m.cliente); }
         });
       });
-      if (JSON.stringify(Esc.empaquetar(copia)).length + JSON.stringify(nuevoInterno || {}).length > 30000) {
+      if (JSON.stringify(copia).length + JSON.stringify(nuevoInterno || {}).length > 30000) {
         errores.push('Las matrices superan el espacio disponible del complemento (32 KB). Quita filas o columnas innecesarias.');
         return resultado(errores);
       }
       matrices = copia; interno = nuevoInterno;
       var d = Esc.fromDate(new Date()); fechaMatrices = Esc.fmtPlantilla(d);
       var rs = Office.context.roamingSettings;
-      rs.set('matrices', Esc.empaquetar(matrices)); rs.set('interno', interno); rs.set('fechaMatrices', fechaMatrices);
+      rs.set('matrices', matrices); rs.set('interno', interno); rs.set('fechaMatrices', fechaMatrices);
       return guardar().then(function () {
         pintarMatrices();
         return cargarAlerta().then(function () {
@@ -253,14 +205,13 @@
 
   Office.onReady(function () {
     item = Office.context.mailbox.item;
-    matrices = Esc.desempaquetar(Office.context.roamingSettings.get('matrices'));
+    matrices = Office.context.roamingSettings.get('matrices') || {};
     analista = Office.context.roamingSettings.get('analista') || '';
     interno = Office.context.roamingSettings.get('interno') || null;
     fechaMatrices = Office.context.roamingSettings.get('fechaMatrices') || '';
     pintarMatrices();
     if (!analista || !Object.keys(matrices).length) $('config').open = true;
     $('sub').addEventListener('change', pintarDestinatarios);
-    $('opcion').addEventListener('change', pintarDestinatarios);
     $('btnLlenar').addEventListener('click', llenar);
     $('btnRevisar').addEventListener('click', revisar);
     $('btnYa').addEventListener('click', yaEscalado);
