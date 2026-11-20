@@ -2,7 +2,7 @@
 (function () {
   var st = document.createElement('style'); st.textContent = "\n  :root { color-scheme: light; }\n  html, body { background: #ffffff !important; color: #1f1f1f !important; }\n  input, select, textarea, button { color-scheme: light; background-color: #ffffff; color: #1f1f1f; }\n  button.prim { background: #0f4c5c; color: #fff; }\n  body { font-family: \"Segoe UI\", Arial, sans-serif; font-size: 13px; color: #1f1f1f; margin: 0; padding: 12px; }\n  h2 { font-size: 15px; font-weight: 600; margin: 0 0 8px; }\n  label { display: block; font-size: 12px; color: #555; margin: 10px 0 3px; }\n  input[type=text], input[type=datetime-local], select { width: 100%; box-sizing: border-box; padding: 6px; border: 1px solid #c8c8c8; border-radius: 4px; font-size: 13px; }\n  .dato { background: #f3f3f3; border-radius: 4px; padding: 6px 8px; margin: 2px 0; }\n  .dato b { color: #555; font-weight: 600; }\n  .dest { font-size: 12px; word-break: break-all; }\n  button { width: 100%; padding: 8px; margin-top: 10px; border-radius: 4px; border: 1px solid #0f4c5c; background: #fff; color: #0f4c5c; font-size: 13px; cursor: pointer; }\n  button.prim { background: #0f4c5c; color: #fff; }\n  .msg { margin-top: 10px; padding: 8px; border-radius: 4px; font-size: 12px; }\n  .err { background: #fdecea; color: #8a1c13; }\n  .avi { background: #fff4ce; color: #6b4d00; }\n  .ok { background: #e6f4ea; color: #1e5631; }\n  details { margin-top: 16px; border-top: 1px solid #ddd; padding-top: 8px; }\n  summary { cursor: pointer; font-weight: 600; }\n  small { color: #666; }\n  ul { margin: 4px 0; padding-left: 18px; }\n";
   document.head.appendChild(st);
-  document.body.innerHTML = "\n  <h2>Preparar escalamiento <small style=\"font-weight:400;color:#888\">v8.6</small></h2>\n  <div id=\"estado\" class=\"msg avi\">Cargando\u2026 (si se queda aqu\u00ed, el complemento no pudo iniciar)</div>\n\n  <div id=\"alerta\" style=\"display:none\">\n    <div class=\"dato\"><b>Alerta:</b> <span id=\"aNombre\"></span></div>\n    <div class=\"dato\"><b>ID Lookup:</b> <span id=\"aId\"></span> \u00b7 <b>Cliente:</b> <span id=\"aCliente\"></span></div>\n    <div class=\"dato\" id=\"aMatriz\" style=\"display:none\"></div>\n\n    <label for=\"sub\">Subcliente</label>\n    <select id=\"sub\"></select>\n    <small id=\"subNota\"></small>\n\n    <label for=\"ocurrencia\">Fecha y hora de ocurrencia</label>\n    <input type=\"datetime-local\" id=\"ocurrencia\">\n    <small id=\"ocuNota\"></small>\n\n    <div class=\"sr\">\n    <label for=\"caso\">Caso (d\u00e9jalo vac\u00edo si no creaste caso)</label>\n    <input type=\"text\" id=\"caso\" placeholder=\"ID del caso\">\n\n    <label><input type=\"checkbox\" id=\"ajAsunto\" checked> Ajustar asunto (quitar \"RV:\" y anteponer el caso)</label>\n    <label><input type=\"checkbox\" id=\"insTabla\" checked> Insertar la tabla de Splunk en \"A continuaci\u00f3n, el detalle de la alerta\"</label>\n    <small id=\"resNota\"></small>\n    <label><input type=\"checkbox\" id=\"quitarSplunk\" checked> Quitar la secci\u00f3n original de Splunk del final</label>\n    <label><input type=\"checkbox\" id=\"bordes\" checked> Arreglar bordes de las tablas de la plantilla</label>\n    <label><input type=\"checkbox\" id=\"limpiar\" checked> Limpiar correo (quitar \"De/Enviado/Para/Asunto\" y mover la firma al final)</label>\n    <label><input type=\"checkbox\" id=\"usarFirma\"> Usar la plantilla de firma al final (reemplaza la firma de Outlook)</label>\n    <small id=\"firmaNota\"></small>\n\n\n    </div>\n    <label>Destinatarios seg\u00fan la matriz</label>\n    <small id=\"metodo\"></small>\n    <div id=\"opcionBox\" style=\"display:none\">\n      <label for=\"opcion\">Opci\u00f3n de destinatarios</label>\n      <select id=\"opcion\"></select>\n    </div>\n    <div class=\"dato dest\"><b>Para:</b> <span id=\"dPara\"></span></div>\n    <div class=\"dato dest\"><b>CC:</b> <span id=\"dCC\"></span></div>\n    <div id=\"indic\" class=\"msg avi\" style=\"display:none\"></div>\n\n    <div class=\"sr\">\n    <button class=\"prim\" id=\"btnLlenar\">Llenar escalamiento</button>\n    <button id=\"btnRevisar\">Revisar destinatarios antes de enviar</button>\n    </div>\n    <div id=\"notaLectura\" class=\"msg ok\" style=\"display:none\">Vista de lectura: aqu\u00ed ves a qui\u00e9n se escala. Para llenar el escalamiento, dale <b>Reenviar</b> y abre este panel en el reenv\u00edo.</div>\n  </div>\n\n  <div id=\"resultado\"></div>\n\n  <details id=\"yaSec\" class=\"sr\">\n    <summary>Responder: \"ya escalado\"</summary>\n    <small>\u00dasalo en una respuesta (Responder) a la alerta repetida. Inserta el texto est\u00e1ndar al inicio y pone los destinatarios internos.</small>\n    <label for=\"yaTipo\">Tipo</label>\n    <select id=\"yaTipo\">\n      <option value=\"previo\">Ya fue escalado anteriormente (misma informaci\u00f3n)</option>\n      <option value=\"agrupada\">Mismo evento de otra alerta que ya se escal\u00f3</option>\n    </select>\n    <label for=\"yaCaso\">Caso (opcional)</label>\n    <input type=\"text\" id=\"yaCaso\" placeholder=\"ID del caso\">\n    <label for=\"yaFecha\">Fecha y hora del correo o alerta anterior</label>\n    <input type=\"datetime-local\" id=\"yaFecha\">\n    <button id=\"btnYa\">Insertar respuesta \"ya escalado\"</button>\n  </details>\n\n  <details id=\"config\">\n    <summary>Configuraci\u00f3n</summary>\n    <label for=\"analista\">Tu nombre para \"Analista SOC\" (Apellidos, Nombres)</label>\n    <input type=\"text\" id=\"analista\" placeholder=\"Apellidos, Nombres\">\n    <button id=\"btnAnalista\">Guardar nombre</button>\n\n    <label for=\"nombreFirma\">Nombre que aparece en la firma (ej. Nombre Apellido)</label>\n    <input type=\"text\" id=\"nombreFirma\" placeholder=\"Nombre para la firma\">\n    <label for=\"cargoFirma\">Cargo en la firma</label>\n    <input type=\"text\" id=\"cargoFirma\" placeholder=\"ANALISTA / CIBERSEGURIDAD\">\n    <button id=\"btnFirma\">Guardar firma</button>\n\n    <label for=\"archivos\">Cargar matrices (Matrices.xlsx: una hoja por cliente + hoja \"Interno\")</label>\n    <input type=\"file\" id=\"archivos\" accept=\".xlsx\" multiple>\n    <div id=\"matricesInfo\" class=\"dato\" style=\"margin-top:6px\"></div>\n    <button id=\"btnBorrar\">Borrar todas las matrices cargadas</button>\n    <small>Las matrices y tu nombre se guardan solo en la configuraci\u00f3n de este complemento en tu buz\u00f3n.</small>\n  </details>\n";
+  document.body.innerHTML = "\n  <h2>Preparar escalamiento <small style=\"font-weight:400;color:#888\">v8.8</small></h2>\n  <div id=\"estado\" class=\"msg avi\">Cargando\u2026 (si se queda aqu\u00ed, el complemento no pudo iniciar)</div>\n\n  <div id=\"alerta\" style=\"display:none\">\n    <div class=\"dato\"><b>Alerta:</b> <span id=\"aNombre\"></span></div>\n    <div class=\"dato\"><b>ID Lookup:</b> <span id=\"aId\"></span> \u00b7 <b>Cliente:</b> <span id=\"aCliente\"></span></div>\n    <div class=\"dato\" id=\"aMatriz\" style=\"display:none\"></div>\n\n    <label for=\"sub\">Subcliente</label>\n    <select id=\"sub\"></select>\n    <small id=\"subNota\"></small>\n\n    <label for=\"ocurrencia\">Fecha y hora de ocurrencia</label>\n    <input type=\"datetime-local\" id=\"ocurrencia\">\n    <small id=\"ocuNota\"></small>\n\n    <div class=\"sr\">\n    <label for=\"caso\">Caso (d\u00e9jalo vac\u00edo si no creaste caso)</label>\n    <input type=\"text\" id=\"caso\" placeholder=\"ID del caso\">\n\n    <label><input type=\"checkbox\" id=\"ajAsunto\" checked> Ajustar asunto (quitar \"RV:\" y anteponer el caso)</label>\n    <label><input type=\"checkbox\" id=\"insTabla\" checked> Insertar la tabla de Splunk en \"A continuaci\u00f3n, el detalle de la alerta\"</label>\n    <small id=\"resNota\"></small>\n    <label><input type=\"checkbox\" id=\"quitarSplunk\" checked> Quitar la secci\u00f3n original de Splunk del final</label>\n    <label><input type=\"checkbox\" id=\"bordes\" checked> Arreglar bordes de las tablas de la plantilla</label>\n    <label><input type=\"checkbox\" id=\"limpiar\" checked> Limpiar correo (quitar \"De/Enviado/Para/Asunto\" y mover la firma al final)</label>\n    <label><input type=\"checkbox\" id=\"usarFirma\"> Usar la plantilla de firma al final (reemplaza la firma de Outlook)</label>\n    <small id=\"firmaNota\"></small>\n\n\n    </div>\n    <label>Destinatarios seg\u00fan la matriz</label>\n    <small id=\"metodo\"></small>\n    <div id=\"opcionBox\" style=\"display:none\">\n      <label for=\"opcion\">Opci\u00f3n de destinatarios</label>\n      <select id=\"opcion\"></select>\n    </div>\n    <div class=\"dato dest\"><b>Para:</b> <span id=\"dPara\"></span></div>\n    <div class=\"dato dest\"><b>CC:</b> <span id=\"dCC\"></span></div>\n    <div id=\"indic\" class=\"msg avi\" style=\"display:none\"></div>\n\n    <div class=\"sr\">\n    <button class=\"prim\" id=\"btnLlenar\">Llenar escalamiento</button>\n    <button id=\"btnRevisar\">Revisar destinatarios antes de enviar</button>\n    </div>\n    <div id=\"notaLectura\" class=\"msg ok\" style=\"display:none\">Vista de lectura: aqu\u00ed ves a qui\u00e9n se escala. Para llenar el escalamiento, dale <b>Reenviar</b> y abre este panel en el reenv\u00edo.</div>\n  </div>\n\n  <div id=\"resultado\"></div>\n\n  <details id=\"yaSec\" class=\"sr\">\n    <summary>Responder: \"ya escalado\"</summary>\n    <small>\u00dasalo en una respuesta (Responder) a la alerta repetida. Inserta el texto est\u00e1ndar al inicio y pone los destinatarios internos.</small>\n    <label for=\"yaTipo\">Tipo</label>\n    <select id=\"yaTipo\">\n      <option value=\"previo\">Ya fue escalado anteriormente (misma informaci\u00f3n)</option>\n      <option value=\"agrupada\">Mismo evento de otra alerta que ya se escal\u00f3</option>\n    </select>\n    <label for=\"yaCaso\">Caso (opcional)</label>\n    <input type=\"text\" id=\"yaCaso\" placeholder=\"ID del caso\">\n    <label for=\"yaFecha\">Fecha y hora del correo o alerta anterior</label>\n    <input type=\"datetime-local\" id=\"yaFecha\">\n    <button id=\"btnYa\">Insertar respuesta \"ya escalado\"</button>\n  </details>\n\n  <details id=\"config\">\n    <summary>Configuraci\u00f3n</summary>\n    <label for=\"analista\">Tu nombre para \"Analista SOC\" (Apellidos, Nombres)</label>\n    <input type=\"text\" id=\"analista\" placeholder=\"Apellidos, Nombres\">\n    <button id=\"btnAnalista\">Guardar nombre</button>\n\n    <label for=\"nombreFirma\">Nombre que aparece en la firma (ej. Nombre Apellido)</label>\n    <input type=\"text\" id=\"nombreFirma\" placeholder=\"Nombre para la firma\">\n    <label for=\"cargoFirma\">Cargo en la firma</label>\n    <input type=\"text\" id=\"cargoFirma\" placeholder=\"ANALISTA / CIBERSEGURIDAD\">\n    <button id=\"btnFirma\">Guardar firma</button>\n\n    <label for=\"archivos\">Cargar matrices (Matrices.xlsx: una hoja por cliente + hoja \"Interno\")</label>\n    <input type=\"file\" id=\"archivos\" accept=\".xlsx\" multiple>\n    <div id=\"matricesInfo\" class=\"dato\" style=\"margin-top:6px\"></div>\n    <button id=\"btnBorrar\">Borrar todas las matrices cargadas</button>\n    <small>Las matrices y tu nombre se guardan solo en la configuraci\u00f3n de este complemento en tu buz\u00f3n.</small>\n  </details>\n";
 })();
 /* Lógica pura del complemento: leer/llenar la plantilla, matrices y validaciones.
    No contiene datos de clientes: todo llega desde la configuración del usuario. */
@@ -45,10 +45,27 @@
     return null;
   }
 
+  /* Escribe el valor en la celda: conserva el formato (p/span) pero borra antes todo el contenido
+     (texto anterior, espacios duros y etiquetas internas de Word como <o:p>). */
   function setCellText(cell, text) {
     var el = cell;
-    while (el.children.length === 1 && el.children[0].tagName !== 'BR') el = el.children[0];
-    el.textContent = text;
+    for (;;) {
+      var hijos = Array.prototype.filter.call(el.children, function (k) { return !/^(o:p|br)$/i.test(k.tagName); });
+      var textoDirecto = Array.prototype.some.call(el.childNodes, function (n) { return n.nodeType === 3 && norm(n.textContent); });
+      if (hijos.length === 1 && !textoDirecto) el = hijos[0]; else break;
+    }
+    while (el.firstChild) el.removeChild(el.firstChild);
+    el.appendChild(el.ownerDocument.createTextNode(norm(text)));
+    // si quedó texto o espacios fuera del elemento elegido, también se borran
+    if (el !== cell) {
+      var n = el;
+      while (n && n !== cell) {
+        Array.prototype.slice.call(n.parentNode.childNodes).forEach(function (s) {
+          if (s !== n && (s.nodeType === 3 || (s.nodeType === 1 && /^o:p$/i.test(s.tagName)))) s.parentNode.removeChild(s);
+        });
+        n = n.parentNode;
+      }
+    }
   }
 
   function readAlert(doc) {
@@ -459,6 +476,56 @@
     return empate ? null : mejor;
   }
 
+  /* Copia las fuentes definidas en los <style> del correo (ej. p.MsoNormal de Word) como estilo en línea,
+     para que no se pierdan cuando Outlook reescribe el cuerpo. */
+  var PROPS_FUENTE = ['font-family', 'font-size', 'color'];
+  function inlinarEstilos(doc) {
+    var css = Array.prototype.map.call(doc.querySelectorAll('style'), function (s) { return s.textContent; }).join('\n')
+      .replace(/\/\*[\s\S]*?\*\//g, '').replace(/<!--|-->/g, '');
+    var reglas = [], re = /([^{}]+)\{([^{}]*)\}/g, m;
+    while ((m = re.exec(css))) {
+      var sel = m[1].trim();
+      if (!sel || sel.indexOf('@') >= 0) continue;
+      var decl = {};
+      m[2].split(';').forEach(function (d) {
+        var i = d.indexOf(':'); if (i < 0) return;
+        var p = d.slice(0, i).trim().toLowerCase(), v = d.slice(i + 1).trim();
+        if (PROPS_FUENTE.indexOf(p) >= 0 && v) decl[p] = v.replace(/\s*!important/i, '');
+      });
+      if (Object.keys(decl).length) reglas.push({ sel: sel, decl: decl });
+    }
+    var n = 0, base = {};
+    // las reglas posteriores ganan: se recorren al revés y no se pisa lo ya puesto
+    reglas.reverse().forEach(function (r) {
+      r.sel.split(',').forEach(function (s) {
+        s = s.trim();
+        if (!s || /:/.test(s)) return;
+        if (/^(html|body)$/i.test(s)) { Object.keys(r.decl).forEach(function (p) { if (!base[p]) base[p] = r.decl[p]; }); return; }
+        var els;
+        try { els = doc.body.querySelectorAll(s); } catch (e) { return; }
+        Array.prototype.forEach.call(els, function (el) {
+          Object.keys(r.decl).forEach(function (p) {
+            if (!el.style.getPropertyValue(p)) { el.style.setProperty(p, r.decl[p]); n++; }
+          });
+        });
+      });
+    });
+    // la fuente general del body pasa a un contenedor, para que se herede
+    var bodyStyle = doc.body.getAttribute('style') || '';
+    var props = Object.keys(base).map(function (p) { return p + ':' + base[p]; });
+    if (props.length || bodyStyle) {
+      var ya = doc.body.children.length === 1 && doc.body.firstElementChild.getAttribute('data-fuente') === '1';
+      if (!ya) {
+        var w = doc.createElement('div');
+        w.setAttribute('data-fuente', '1');
+        w.setAttribute('style', props.join(';') + (props.length && bodyStyle ? ';' : '') + bodyStyle);
+        while (doc.body.firstChild) w.appendChild(doc.body.firstChild);
+        doc.body.appendChild(w);
+      }
+    }
+    return n;
+  }
+
   /* Limpieza: quita el encabezado del reenvío/respuesta (De:/Enviado:/Para:/Asunto:) y la línea separadora,
      y mueve lo que está arriba (firma) al final del correo. */
   function vacio(n) {
@@ -620,7 +687,7 @@
     buscarFilas: buscarFilas, viaAlias: viaAlias, aliasCoincide: aliasCoincide, tieneMatrizNueva: tieneMatrizNueva, valoresColumna: valoresColumna,
     esSoar: esSoar, indicaciones: indicaciones, sinDuplicados: sinDuplicados,
     empaquetar: empaquetar, desempaquetar: desempaquetar,
-    arreglarBordes: arreglarBordes, limpiarCorreo: limpiarCorreo,
+    arreglarBordes: arreglarBordes, limpiarCorreo: limpiarCorreo, inlinarEstilos: inlinarEstilos,
     textoYaEscalado: textoYaEscalado, leerLibro: leerLibro,
     extraerResultados: extraerResultados, htmlTabla: htmlTabla, insertarTabla: insertarTabla,
     quitarSplunk: quitarSplunk, matrizDe: matrizDe,
@@ -824,6 +891,7 @@
         if (!lim.encabezado) avisos.push('No encontré el encabezado del reenvío (De/Enviado/Asunto) para quitarlo; puede que ya se haya limpiado.');
         if (usar) Esc.ponerFirma(doc, Esc.armarFirma(firma, nombreFirma || analista, cargoFirma), lim.padre);
       }
+      try { Esc.inlinarEstilos(doc); } catch (e) { avisos.push('No pude conservar las fuentes: ' + e.message); }
       var nuevo = '<!DOCTYPE html>' + doc.documentElement.outerHTML;
       return setBody(nuevo)
         .then(function () { if (!sinDest) return setRec('to', Esc.emails(fila.Para)); })
