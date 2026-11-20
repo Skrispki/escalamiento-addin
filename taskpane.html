@@ -33,6 +33,7 @@
   <div id="alerta" style="display:none">
     <div class="dato"><b>Alerta:</b> <span id="aNombre"></span></div>
     <div class="dato"><b>ID Lookup:</b> <span id="aId"></span> · <b>Cliente:</b> <span id="aCliente"></span></div>
+    <div class="dato" id="aMatriz" style="display:none"></div>
 
     <label for="sub">Subcliente</label>
     <select id="sub"></select>
@@ -46,10 +47,21 @@
     <input type="text" id="caso" placeholder="ID del caso">
 
     <label><input type="checkbox" id="ajAsunto" checked> Ajustar asunto (quitar "RV:" y anteponer el caso)</label>
+    <label><input type="checkbox" id="insTabla" checked> Insertar la tabla de Splunk en "A continuación, el detalle de la alerta"</label>
+    <small id="resNota"></small>
+    <label><input type="checkbox" id="quitarSplunk" checked> Quitar la sección original de Splunk del final</label>
+    <label><input type="checkbox" id="bordes" checked> Arreglar bordes de las tablas de la plantilla</label>
+
 
     <label>Destinatarios según la matriz</label>
+    <small id="metodo"></small>
+    <div id="opcionBox" style="display:none">
+      <label for="opcion">Opción de destinatarios</label>
+      <select id="opcion"></select>
+    </div>
     <div class="dato dest"><b>Para:</b> <span id="dPara"></span></div>
     <div class="dato dest"><b>CC:</b> <span id="dCC"></span></div>
+    <div id="indic" class="msg avi" style="display:none"></div>
 
     <button class="prim" id="btnLlenar">Llenar escalamiento</button>
     <button id="btnRevisar">Revisar destinatarios antes de enviar</button>
@@ -57,20 +69,35 @@
 
   <div id="resultado"></div>
 
+  <details id="yaSec">
+    <summary>Responder: "ya escalado"</summary>
+    <small>Úsalo en una respuesta (Responder) a la alerta repetida. Inserta el texto estándar al inicio y pone los destinatarios internos.</small>
+    <label for="yaTipo">Tipo</label>
+    <select id="yaTipo">
+      <option value="previo">Ya fue escalado anteriormente (misma información)</option>
+      <option value="agrupada">Mismo evento de otra alerta que ya se escaló</option>
+    </select>
+    <label for="yaCaso">Caso (opcional)</label>
+    <input type="text" id="yaCaso" placeholder="ID del caso">
+    <label for="yaFecha">Fecha y hora del correo o alerta anterior</label>
+    <input type="datetime-local" id="yaFecha">
+    <button id="btnYa">Insertar respuesta "ya escalado"</button>
+  </details>
+
   <details id="config">
     <summary>Configuración</summary>
     <label for="analista">Tu nombre para "Analista SOC" (Apellidos, Nombres)</label>
     <input type="text" id="analista" placeholder="Apellidos, Nombres">
     <button id="btnAnalista">Guardar nombre</button>
 
-    <label for="archivos">Cargar matrices (un Excel por cliente, nombre del archivo = cliente)</label>
+    <label for="archivos">Cargar matrices (Matrices.xlsx: una hoja por cliente + hoja "Interno")</label>
     <input type="file" id="archivos" accept=".xlsx" multiple>
     <div id="matricesInfo" class="dato" style="margin-top:6px"></div>
     <button id="btnBorrar">Borrar todas las matrices cargadas</button>
     <small>Las matrices y tu nombre se guardan solo en la configuración de este complemento en tu buzón.</small>
   </details>
 
-  <script src="core.js"></script>
-  <script src="taskpane.js"></script>
+  <script src="core.js?v=7"></script>
+  <script src="taskpane.js?v=7"></script>
 </body>
 </html>
