@@ -2,7 +2,7 @@
 (function () {
   var st = document.createElement('style'); st.textContent = "\n  body { font-family: \"Segoe UI\", Arial, sans-serif; font-size: 13px; color: #1f1f1f; margin: 0; padding: 12px; }\n  h2 { font-size: 15px; font-weight: 600; margin: 0 0 8px; }\n  label { display: block; font-size: 12px; color: #555; margin: 10px 0 3px; }\n  input[type=text], input[type=datetime-local], select { width: 100%; box-sizing: border-box; padding: 6px; border: 1px solid #c8c8c8; border-radius: 4px; font-size: 13px; }\n  .dato { background: #f3f3f3; border-radius: 4px; padding: 6px 8px; margin: 2px 0; }\n  .dato b { color: #555; font-weight: 600; }\n  .dest { font-size: 12px; word-break: break-all; }\n  button { width: 100%; padding: 8px; margin-top: 10px; border-radius: 4px; border: 1px solid #0f4c5c; background: #fff; color: #0f4c5c; font-size: 13px; cursor: pointer; }\n  button.prim { background: #0f4c5c; color: #fff; }\n  .msg { margin-top: 10px; padding: 8px; border-radius: 4px; font-size: 12px; }\n  .err { background: #fdecea; color: #8a1c13; }\n  .avi { background: #fff4ce; color: #6b4d00; }\n  .ok { background: #e6f4ea; color: #1e5631; }\n  details { margin-top: 16px; border-top: 1px solid #ddd; padding-top: 8px; }\n  summary { cursor: pointer; font-weight: 600; }\n  small { color: #666; }\n  ul { margin: 4px 0; padding-left: 18px; }\n";
   document.head.appendChild(st);
-  document.body.innerHTML = "\n  <h2>Preparar escalamiento <small style=\"font-weight:400;color:#888\">v8</small></h2>\n  <div id=\"estado\" class=\"msg avi\">Cargando\u2026 (si se queda aqu\u00ed, el complemento no pudo iniciar)</div>\n\n  <div id=\"alerta\" style=\"display:none\">\n    <div class=\"dato\"><b>Alerta:</b> <span id=\"aNombre\"></span></div>\n    <div class=\"dato\"><b>ID Lookup:</b> <span id=\"aId\"></span> \u00b7 <b>Cliente:</b> <span id=\"aCliente\"></span></div>\n    <div class=\"dato\" id=\"aMatriz\" style=\"display:none\"></div>\n\n    <label for=\"sub\">Subcliente</label>\n    <select id=\"sub\"></select>\n    <small id=\"subNota\"></small>\n\n    <label for=\"ocurrencia\">Fecha y hora de ocurrencia</label>\n    <input type=\"datetime-local\" id=\"ocurrencia\">\n    <small id=\"ocuNota\"></small>\n\n    <label for=\"caso\">Caso (d\u00e9jalo vac\u00edo si no creaste caso)</label>\n    <input type=\"text\" id=\"caso\" placeholder=\"ID del caso\">\n\n    <label><input type=\"checkbox\" id=\"ajAsunto\" checked> Ajustar asunto (quitar \"RV:\" y anteponer el caso)</label>\n    <label><input type=\"checkbox\" id=\"insTabla\" checked> Insertar la tabla de Splunk en \"A continuaci\u00f3n, el detalle de la alerta\"</label>\n    <small id=\"resNota\"></small>\n    <label><input type=\"checkbox\" id=\"quitarSplunk\" checked> Quitar la secci\u00f3n original de Splunk del final</label>\n    <label><input type=\"checkbox\" id=\"bordes\" checked> Arreglar bordes de las tablas de la plantilla</label>\n    <label><input type=\"checkbox\" id=\"limpiar\" checked> Limpiar correo (quitar \"De/Enviado/Para/Asunto\" y mover la firma al final)</label>\n\n\n    <label>Destinatarios seg\u00fan la matriz</label>\n    <small id=\"metodo\"></small>\n    <div id=\"opcionBox\" style=\"display:none\">\n      <label for=\"opcion\">Opci\u00f3n de destinatarios</label>\n      <select id=\"opcion\"></select>\n    </div>\n    <div class=\"dato dest\"><b>Para:</b> <span id=\"dPara\"></span></div>\n    <div class=\"dato dest\"><b>CC:</b> <span id=\"dCC\"></span></div>\n    <div id=\"indic\" class=\"msg avi\" style=\"display:none\"></div>\n\n    <button class=\"prim\" id=\"btnLlenar\">Llenar escalamiento</button>\n    <button id=\"btnRevisar\">Revisar destinatarios antes de enviar</button>\n  </div>\n\n  <div id=\"resultado\"></div>\n\n  <details id=\"yaSec\">\n    <summary>Responder: \"ya escalado\"</summary>\n    <small>\u00dasalo en una respuesta (Responder) a la alerta repetida. Inserta el texto est\u00e1ndar al inicio y pone los destinatarios internos.</small>\n    <label for=\"yaTipo\">Tipo</label>\n    <select id=\"yaTipo\">\n      <option value=\"previo\">Ya fue escalado anteriormente (misma informaci\u00f3n)</option>\n      <option value=\"agrupada\">Mismo evento de otra alerta que ya se escal\u00f3</option>\n    </select>\n    <label for=\"yaCaso\">Caso (opcional)</label>\n    <input type=\"text\" id=\"yaCaso\" placeholder=\"ID del caso\">\n    <label for=\"yaFecha\">Fecha y hora del correo o alerta anterior</label>\n    <input type=\"datetime-local\" id=\"yaFecha\">\n    <button id=\"btnYa\">Insertar respuesta \"ya escalado\"</button>\n  </details>\n\n  <details id=\"config\">\n    <summary>Configuraci\u00f3n</summary>\n    <label for=\"analista\">Tu nombre para \"Analista SOC\" (Apellidos, Nombres)</label>\n    <input type=\"text\" id=\"analista\" placeholder=\"Apellidos, Nombres\">\n    <button id=\"btnAnalista\">Guardar nombre</button>\n\n    <label for=\"archivos\">Cargar matrices (Matrices.xlsx: una hoja por cliente + hoja \"Interno\")</label>\n    <input type=\"file\" id=\"archivos\" accept=\".xlsx\" multiple>\n    <div id=\"matricesInfo\" class=\"dato\" style=\"margin-top:6px\"></div>\n    <button id=\"btnBorrar\">Borrar todas las matrices cargadas</button>\n    <small>Las matrices y tu nombre se guardan solo en la configuraci\u00f3n de este complemento en tu buz\u00f3n.</small>\n  </details>\n";
+  document.body.innerHTML = "\n  <h2>Preparar escalamiento <small style=\"font-weight:400;color:#888\">v8.2</small></h2>\n  <div id=\"estado\" class=\"msg avi\">Cargando\u2026 (si se queda aqu\u00ed, el complemento no pudo iniciar)</div>\n\n  <div id=\"alerta\" style=\"display:none\">\n    <div class=\"dato\"><b>Alerta:</b> <span id=\"aNombre\"></span></div>\n    <div class=\"dato\"><b>ID Lookup:</b> <span id=\"aId\"></span> \u00b7 <b>Cliente:</b> <span id=\"aCliente\"></span></div>\n    <div class=\"dato\" id=\"aMatriz\" style=\"display:none\"></div>\n\n    <label for=\"sub\">Subcliente</label>\n    <select id=\"sub\"></select>\n    <small id=\"subNota\"></small>\n\n    <label for=\"ocurrencia\">Fecha y hora de ocurrencia</label>\n    <input type=\"datetime-local\" id=\"ocurrencia\">\n    <small id=\"ocuNota\"></small>\n\n    <label for=\"caso\">Caso (d\u00e9jalo vac\u00edo si no creaste caso)</label>\n    <input type=\"text\" id=\"caso\" placeholder=\"ID del caso\">\n\n    <label><input type=\"checkbox\" id=\"ajAsunto\" checked> Ajustar asunto (quitar \"RV:\" y anteponer el caso)</label>\n    <label><input type=\"checkbox\" id=\"insTabla\" checked> Insertar la tabla de Splunk en \"A continuaci\u00f3n, el detalle de la alerta\"</label>\n    <small id=\"resNota\"></small>\n    <label><input type=\"checkbox\" id=\"quitarSplunk\" checked> Quitar la secci\u00f3n original de Splunk del final</label>\n    <label><input type=\"checkbox\" id=\"bordes\" checked> Arreglar bordes de las tablas de la plantilla</label>\n    <label><input type=\"checkbox\" id=\"limpiar\" checked> Limpiar correo (quitar \"De/Enviado/Para/Asunto\" y mover la firma al final)</label>\n    <label><input type=\"checkbox\" id=\"usarFirma\"> Usar la plantilla de firma al final (reemplaza la firma de Outlook)</label>\n    <small id=\"firmaNota\"></small>\n\n\n    <label>Destinatarios seg\u00fan la matriz</label>\n    <small id=\"metodo\"></small>\n    <div id=\"opcionBox\" style=\"display:none\">\n      <label for=\"opcion\">Opci\u00f3n de destinatarios</label>\n      <select id=\"opcion\"></select>\n    </div>\n    <div class=\"dato dest\"><b>Para:</b> <span id=\"dPara\"></span></div>\n    <div class=\"dato dest\"><b>CC:</b> <span id=\"dCC\"></span></div>\n    <div id=\"indic\" class=\"msg avi\" style=\"display:none\"></div>\n\n    <button class=\"prim\" id=\"btnLlenar\">Llenar escalamiento</button>\n    <button id=\"btnRevisar\">Revisar destinatarios antes de enviar</button>\n  </div>\n\n  <div id=\"resultado\"></div>\n\n  <details id=\"yaSec\">\n    <summary>Responder: \"ya escalado\"</summary>\n    <small>\u00dasalo en una respuesta (Responder) a la alerta repetida. Inserta el texto est\u00e1ndar al inicio y pone los destinatarios internos.</small>\n    <label for=\"yaTipo\">Tipo</label>\n    <select id=\"yaTipo\">\n      <option value=\"previo\">Ya fue escalado anteriormente (misma informaci\u00f3n)</option>\n      <option value=\"agrupada\">Mismo evento de otra alerta que ya se escal\u00f3</option>\n    </select>\n    <label for=\"yaCaso\">Caso (opcional)</label>\n    <input type=\"text\" id=\"yaCaso\" placeholder=\"ID del caso\">\n    <label for=\"yaFecha\">Fecha y hora del correo o alerta anterior</label>\n    <input type=\"datetime-local\" id=\"yaFecha\">\n    <button id=\"btnYa\">Insertar respuesta \"ya escalado\"</button>\n  </details>\n\n  <details id=\"config\">\n    <summary>Configuraci\u00f3n</summary>\n    <label for=\"analista\">Tu nombre para \"Analista SOC\" (Apellidos, Nombres)</label>\n    <input type=\"text\" id=\"analista\" placeholder=\"Apellidos, Nombres\">\n    <button id=\"btnAnalista\">Guardar nombre</button>\n\n    <label for=\"nombreFirma\">Nombre que aparece en la firma (ej. Nombre Apellido)</label>\n    <input type=\"text\" id=\"nombreFirma\" placeholder=\"Nombre para la firma\">\n    <label for=\"cargoFirma\">Cargo en la firma</label>\n    <input type=\"text\" id=\"cargoFirma\" placeholder=\"ANALISTA / CIBERSEGURIDAD\">\n    <button id=\"btnFirma\">Guardar firma</button>\n\n    <label for=\"archivos\">Cargar matrices (Matrices.xlsx: una hoja por cliente + hoja \"Interno\")</label>\n    <input type=\"file\" id=\"archivos\" accept=\".xlsx\" multiple>\n    <div id=\"matricesInfo\" class=\"dato\" style=\"margin-top:6px\"></div>\n    <button id=\"btnBorrar\">Borrar todas las matrices cargadas</button>\n    <small>Las matrices y tu nombre se guardan solo en la configuraci\u00f3n de este complemento en tu buz\u00f3n.</small>\n  </details>\n";
 })();
 /* Lógica pura del complemento: leer/llenar la plantilla, matrices y validaciones.
    No contiene datos de clientes: todo llega desde la configuración del usuario. */
@@ -276,12 +276,53 @@
   function escHtml(s) {
     return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
   }
+  var CAMPOS_SPLUNK = ['_time', 'id_matriz', 'bunit', 'alert_name', 'data_center', 'count', 'host', 'src', 'src_ip', 'dest', 'dest_ip', 'user'];
+  function esTablaDatos(t) {
+    if (t.querySelector('table')) return false;
+    return filasDe(t).length >= 2;
+  }
+  /* La plantilla es la tabla más interna que contiene la etiqueta "Nombre de la alerta:". */
+  function tablaPlantilla(doc) {
+    var cel = findValueCell(doc, LABELS.nombre);
+    return cel && cel.closest ? cel.closest('table') : null;
+  }
+  function dentroPlantilla(el) {
+    var tp = tablaPlantilla(el.ownerDocument);
+    return !!(tp && (tp === el || tp.contains(el)));
+  }
   function tablaResultados(doc) {
-    var ts = doc.querySelectorAll('table');
-    for (var i = 0; i < ts.length; i++) {
+    var ts = Array.prototype.slice.call(doc.querySelectorAll('table'));
+    var marca = key('Nombre de la alerta'), i;
+    for (i = 0; i < ts.length; i++) {
       if (/(^|[\s_-])results(\s|$)/i.test(ts[i].getAttribute('class') || '')) return ts[i];
     }
+    for (i = 0; i < ts.length; i++) {
+      var t = ts[i];
+      if (!esTablaDatos(t) || dentroPlantilla(t)) continue;
+      var cab = Array.prototype.map.call(filasDe(t)[0].querySelectorAll('th, td'), function (x) { return key(x.textContent); });
+      if (cab.some(function (h) { return CAMPOS_SPLUNK.indexOf(h) >= 0; })) return t;
+    }
+    var links = Array.prototype.filter.call(doc.body.querySelectorAll('a, span, p, div, td'), function (el) {
+      return /view results in splunk/i.test(el.textContent) && !el.querySelector('a, span, p, div, td') && !dentroPlantilla(el);
+    });
+    var ultimo = links[links.length - 1];
+    if (ultimo) {
+      for (i = 0; i < ts.length; i++) {
+        if ((ultimo.compareDocumentPosition(ts[i]) & 4) && esTablaDatos(ts[i]) && !dentroPlantilla(ts[i])) return ts[i];
+      }
+    }
     return null;
+  }
+  function inicioSeccionSplunk(doc) {
+    var els = Array.prototype.filter.call(doc.body.querySelectorAll('p, div, td, span'), function (el) {
+      return /^alert\s*:/i.test(norm(el.textContent)) && !el.querySelector('p, div, td') && !dentroPlantilla(el);
+    });
+    if (!els.length) return null;
+    var el = els[els.length - 1];
+    var tb = el.closest ? el.closest('table') : null;
+    var marca = key('Nombre de la alerta');
+    if (tb && key(tb.textContent).indexOf(marca) < 0) return tb;
+    return (el.closest && (el.closest('tr') || el.closest('p, div'))) || el;
   }
   function textoCelda(td) {
     var pres = td.querySelectorAll('pre');
@@ -307,6 +348,7 @@
     if (!trs.length) return null;
     var cab = Array.prototype.map.call(trs[0].querySelectorAll('th, td'), function (c) { return norm(c.textContent); });
     var corte = cab.map(key).indexOf('id_matriz');
+    if (corte < 0) corte = cab.map(key).indexOf('alert_name');
     var idx = [];
     cab.forEach(function (h, i) {
       if (corte >= 0 && i >= corte) return;
@@ -367,10 +409,10 @@
   function quitarSplunk(doc, resNodo) {
     var ts = doc.querySelectorAll('table'), inicio = null;
     for (var i = 0; i < ts.length; i++) {
-      if (/(^|[\s_-])summary(\s|$)/i.test(ts[i].getAttribute('class') || '')) { inicio = ts[i]; break; }
+      if (/(^|[\s_-])summary(\s|$)/i.test(ts[i].getAttribute('class') || '') && key(ts[i].textContent).indexOf(key('Nombre de la alerta')) < 0) { inicio = ts[i]; break; }
     }
-    inicio = inicio || resNodo;
-    if (!inicio) return false;
+    inicio = inicio || inicioSeccionSplunk(doc) || (resNodo && !dentroPlantilla(resNodo) ? resNodo : null);
+    if (!inicio || !inicio.parentNode) return false;
     var nodo = inicio;
     while (nodo && nodo !== doc.body) {
       while (nodo.nextSibling) nodo.parentNode.removeChild(nodo.nextSibling);
@@ -421,7 +463,7 @@
     if (n.tagName === 'HR') return true;
     return !norm(n.textContent) && !n.querySelector('img, table');
   }
-  function limpiarCorreo(doc) {
+  function limpiarCorreo(doc, descartarArriba) {
     var body = doc.body, marca = key('Nombre de la alerta');
     var reDe = /(^|\s)(de|from)\s*:/, reAs = /(asunto|subject)\s*:/;
     var cands = Array.prototype.filter.call(body.querySelectorAll('*'), function (el) {
@@ -445,11 +487,11 @@
     arriba.forEach(function (x) { padre.removeChild(x); });
     // quita líneas vacías al inicio
     while (padre.firstChild && vacio(padre.firstChild)) padre.removeChild(padre.firstChild);
-    if (hayFirma) {
+    if (hayFirma && !descartarArriba) {
       var sep = doc.createElement('p'); sep.innerHTML = '&nbsp;'; padre.appendChild(sep);
       arriba.forEach(function (x) { padre.appendChild(x); });
     }
-    return { encabezado: true, firma: hayFirma };
+    return { encabezado: true, firma: hayFirma, padre: padre };
   }
 
   /* Bordes de la plantilla: convierte "border-color" sin borde definido en borde sólido (como el flujo original). */
@@ -484,10 +526,15 @@
      Compatibilidad: si solo hay una hoja "Matriz", el cliente es el nombre del archivo. */
   function leerLibro(nombresHojas, filasDeHoja, nombreArchivo) {
     var clientes = [], interno = null;
-    var ignorar = ['instrucciones', 'leeme', 'readme'];
+    var ignorar = ['instrucciones', 'leeme', 'readme'], firma = null;
     var hojas = nombresHojas.filter(function (h) { return ignorar.indexOf(key(h)) < 0; });
     hojas.forEach(function (h) {
       var filas = filasDeHoja(h);
+      if (key(h) === 'firma') {
+        var fr = filas[0] || {};
+        Object.keys(fr).forEach(function (k) { if (key(k) === 'html') firma = compactarHtml(fr[k]); });
+        return;
+      }
       if (key(h) === 'interno') {
         var r = filas[0] || {}, o = {};
         Object.keys(r).forEach(function (k) { if (key(k) === 'para') o.Para = norm(r[k]); if (key(k) === 'cc') o.CC = norm(r[k]); });
@@ -498,7 +545,7 @@
         ? String(nombreArchivo || '').replace(/\.xlsx$/i, '').trim() : norm(h);
       clientes.push({ cliente: cliente, rows: filasMatriz(filas) });
     });
-    return { clientes: clientes, interno: interno };
+    return { clientes: clientes, interno: interno, firma: firma };
   }
 
   /* Guardado compacto: los textos de Para/CC repetidos se guardan una sola vez (límite de 32 KB del buzón). */
@@ -548,7 +595,23 @@
     return cc.filter(function (e) { if (p[e] || vistos[e]) return false; vistos[e] = 1; return true; });
   }
 
+  function armarFirma(plantilla, nombre, cargo) {
+    return String(plantilla || '').replace(/\{\{\s*NOMBRE\s*\}\}/g, escHtml(nombre || '')).replace(/\{\{\s*CARGO\s*\}\}/g, escHtml(cargo || ''));
+  }
+  /* Pone la firma al final si no está ya. */
+  function ponerFirma(doc, html, padre) {
+    var tmp = doc.createElement('div'); tmp.innerHTML = html;
+    var tf = key(tmp.textContent);
+    if (tf && key(doc.body.textContent).indexOf(tf) >= 0) return false;
+    var destino = padre && padre.parentNode ? padre : doc.body;
+    var sep = doc.createElement('p'); sep.innerHTML = '&nbsp;'; destino.appendChild(sep);
+    while (tmp.firstChild) destino.appendChild(tmp.firstChild);
+    return true;
+  }
+  function compactarHtml(h) { return String(h || '').replace(/>\s+</g, '><').replace(/\s{2,}/g, ' ').trim(); }
+
   var api = {
+    armarFirma: armarFirma, ponerFirma: ponerFirma, compactarHtml: compactarHtml,
     buscarFilas: buscarFilas, viaAlias: viaAlias, aliasCoincide: aliasCoincide, tieneMatrizNueva: tieneMatrizNueva, valoresColumna: valoresColumna,
     esSoar: esSoar, indicaciones: indicaciones, sinDuplicados: sinDuplicados,
     empaquetar: empaquetar, desempaquetar: desempaquetar,
@@ -576,6 +639,7 @@
   };
   var $ = function (id) { return document.getElementById(id); };
   var item, matrices = {}, analista = '', alerta = null, clienteKey = null, interno = null, fechaMatrices = '';
+  var firma = '', nombreFirma = '', cargoFirma = '';
 
   function p(fn) {
     return new Promise(function (ok, ko) {
@@ -653,7 +717,11 @@
       : 'No hay matrices cargadas.';
     if (ks.length && fechaMatrices) $('matricesInfo').innerHTML += '<br>Cargadas el ' + esc(fechaMatrices);
     $('matricesInfo').innerHTML += '<br>Respuestas internas: ' + (interno ? esc(Esc.emails(interno.Para).join('; ')) + (interno.CC ? ' · CC: ' + esc(Esc.emails(interno.CC).join('; ')) : '') : 'sin configurar (hoja "Interno")');
+    $('matricesInfo').innerHTML += '<br>Plantilla de firma: ' + (firma ? 'cargada' : 'no cargada (hoja "Firma")');
     $('analista').value = analista;
+    $('nombreFirma').value = nombreFirma; $('cargoFirma').value = cargoFirma;
+    $('usarFirma').checked = !!firma; $('usarFirma').disabled = !firma;
+    $('firmaNota').textContent = firma ? '' : 'Carga Matrices.xlsx con la hoja "Firma" para usar esta opción.';
   }
 
   function cargarAlerta() {
@@ -743,8 +811,10 @@
       if ($('quitarSplunk').checked) Esc.quitarSplunk(doc, res && res.nodo);
       if ($('bordes').checked) Esc.arreglarBordes(doc);
       if ($('limpiar').checked) {
-        var lim = Esc.limpiarCorreo(doc);
+        var usar = $('usarFirma').checked && !!firma;
+        var lim = Esc.limpiarCorreo(doc, usar);
         if (!lim.encabezado) avisos.push('No encontré el encabezado del reenvío (De/Enviado/Asunto) para quitarlo; puede que ya se haya limpiado.');
+        if (usar) Esc.ponerFirma(doc, Esc.armarFirma(firma, nombreFirma || analista, cargoFirma), lim.padre);
       }
       var nuevo = '<!DOCTYPE html>' + doc.documentElement.outerHTML;
       return setBody(nuevo)
@@ -787,22 +857,23 @@
     var files = Array.prototype.slice.call(ev.target.files || []);
     if (!files.length) return;
     Promise.all(files.map(leerExcel)).then(function (libros) {
-      var errores = [], copia = JSON.parse(JSON.stringify(matrices)), nuevoInterno = interno, cargados = [];
+      var errores = [], copia = JSON.parse(JSON.stringify(matrices)), nuevoInterno = interno, cargados = [], nuevaFirma = firma;
       libros.forEach(function (l) {
         if (l.interno) nuevoInterno = l.interno;
+        if (l.firma) nuevaFirma = l.firma;
         l.clientes.forEach(function (m) {
           if (!m.rows.length) errores.push('La hoja "' + m.cliente + '" no tiene filas válidas.');
           else { copia[Esc.key(m.cliente)] = m; cargados.push(m.cliente); }
         });
       });
-      if (JSON.stringify(Esc.empaquetar(copia)).length + JSON.stringify(nuevoInterno || {}).length > 30000) {
+      if (JSON.stringify(Esc.empaquetar(copia)).length + JSON.stringify(nuevoInterno || {}).length + (nuevaFirma || '').length > 30000) {
         errores.push('Las matrices superan el espacio disponible del complemento (32 KB). Quita filas o columnas innecesarias.');
         return resultado(errores);
       }
-      matrices = copia; interno = nuevoInterno;
+      matrices = copia; interno = nuevoInterno; firma = nuevaFirma || '';
       var d = Esc.fromDate(new Date()); fechaMatrices = Esc.fmtPlantilla(d);
       var rs = Office.context.roamingSettings;
-      rs.set('matrices', Esc.empaquetar(matrices)); rs.set('interno', interno); rs.set('fechaMatrices', fechaMatrices);
+      rs.set('matrices', Esc.empaquetar(matrices)); rs.set('interno', interno); rs.set('firma', firma); rs.set('fechaMatrices', fechaMatrices);
       return guardar().then(function () {
         pintarMatrices();
         return cargarAlerta().then(function () {
@@ -837,6 +908,9 @@
     analista = Office.context.roamingSettings.get('analista') || '';
     interno = Office.context.roamingSettings.get('interno') || null;
     fechaMatrices = Office.context.roamingSettings.get('fechaMatrices') || '';
+    firma = Office.context.roamingSettings.get('firma') || '';
+    nombreFirma = Office.context.roamingSettings.get('nombreFirma') || '';
+    cargoFirma = Office.context.roamingSettings.get('cargoFirma') || 'ANALISTA / CIBERSEGURIDAD';
     pintarMatrices();
     if (!analista || !Object.keys(matrices).length) $('config').open = true;
     $('sub').addEventListener('change', pintarDestinatarios);
@@ -844,6 +918,11 @@
     $('btnLlenar').addEventListener('click', llenar);
     $('btnRevisar').addEventListener('click', revisar);
     $('btnYa').addEventListener('click', yaEscalado);
+    $('btnFirma').addEventListener('click', function () {
+      nombreFirma = Esc.norm($('nombreFirma').value); cargoFirma = Esc.norm($('cargoFirma').value);
+      Office.context.roamingSettings.set('nombreFirma', nombreFirma); Office.context.roamingSettings.set('cargoFirma', cargoFirma);
+      guardar().then(function () { resultado(null, null, 'Firma guardada: ' + nombreFirma + ' · ' + cargoFirma); });
+    });
     $('archivos').addEventListener('change', cargarArchivos);
     $('btnAnalista').addEventListener('click', function () {
       analista = Esc.norm($('analista').value);
@@ -851,10 +930,11 @@
       guardar().then(function () { resultado(null, null, 'Nombre guardado: ' + analista); });
     });
     $('btnBorrar').addEventListener('click', function () {
-      matrices = {}; interno = null; fechaMatrices = '';
+      matrices = {}; interno = null; fechaMatrices = ''; firma = '';
       Office.context.roamingSettings.set('matrices', matrices);
       Office.context.roamingSettings.set('interno', null);
       Office.context.roamingSettings.set('fechaMatrices', '');
+      Office.context.roamingSettings.set('firma', '');
       guardar().then(function () { pintarMatrices(); cargarAlerta(); });
     });
     cargarAlerta();
