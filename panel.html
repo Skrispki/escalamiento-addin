@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>Preparar escalamiento</title>
+<script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+<script src="xlsx.full.min.js"></script>
+</head>
+<body>
+<div style="font-family:Segoe UI,Arial,sans-serif;font-size:13px;padding:12px">Cargando la versión más reciente…</div>
+<script>
+(function () {
+  var s = document.createElement('script');
+  s.src = 'app.js?t=' + Date.now();
+  s.onerror = function () {
+    document.body.innerHTML = '<p style="font-family:Segoe UI,Arial,sans-serif;font-size:13px;color:#8a1c13;padding:12px">No se pudo descargar app.js. Revisa que esté subido en GitHub y tu conexión.</p>';
+  };
+  document.body.appendChild(s);
+})();
+</script>
+</body>
+</html>
