@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preparar escalamiento</title>
+<script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+<script src="xlsx.full.min.js"></script>
+<style>
+  body { font-family: "Segoe UI", Arial, sans-serif; font-size: 13px; color: #1f1f1f; margin: 0; padding: 12px; }
+  h2 { font-size: 15px; font-weight: 600; margin: 0 0 8px; }
+  label { display: block; font-size: 12px; color: #555; margin: 10px 0 3px; }
+  input[type=text], input[type=datetime-local], select { width: 100%; box-sizing: border-box; padding: 6px; border: 1px solid #c8c8c8; border-radius: 4px; font-size: 13px; }
+  .dato { background: #f3f3f3; border-radius: 4px; padding: 6px 8px; margin: 2px 0; }
+  .dato b { color: #555; font-weight: 600; }
+  .dest { font-size: 12px; word-break: break-all; }
+  button { width: 100%; padding: 8px; margin-top: 10px; border-radius: 4px; border: 1px solid #0f4c5c; background: #fff; color: #0f4c5c; font-size: 13px; cursor: pointer; }
+  button.prim { background: #0f4c5c; color: #fff; }
+  .msg { margin-top: 10px; padding: 8px; border-radius: 4px; font-size: 12px; }
+  .err { background: #fdecea; color: #8a1c13; }
+  .avi { background: #fff4ce; color: #6b4d00; }
+  .ok { background: #e6f4ea; color: #1e5631; }
+  details { margin-top: 16px; border-top: 1px solid #ddd; padding-top: 8px; }
+  summary { cursor: pointer; font-weight: 600; }
+  small { color: #666; }
+  ul { margin: 4px 0; padding-left: 18px; }
+</style>
+</head>
+<body>
+  <h2>Preparar escalamiento</h2>
+  <div id="estado" class="msg avi">Cargando…</div>
+
+  <div id="alerta" style="display:none">
+    <div class="dato"><b>Alerta:</b> <span id="aNombre"></span></div>
+    <div class="dato"><b>ID Lookup:</b> <span id="aId"></span> · <b>Cliente:</b> <span id="aCliente"></span></div>
+
+    <label for="sub">Subcliente</label>
+    <select id="sub"></select>
+    <small id="subNota"></small>
+
+    <label for="ocurrencia">Fecha y hora de ocurrencia</label>
+    <input type="datetime-local" id="ocurrencia">
+    <small id="ocuNota"></small>
+
+    <label for="caso">Caso (déjalo vacío si no creaste caso)</label>
+    <input type="text" id="caso" placeholder="ID del caso">
+
+    <label><input type="checkbox" id="ajAsunto" checked> Ajustar asunto (quitar "RV:" y anteponer el caso)</label>
+
+    <label>Destinatarios según la matriz</label>
+    <div class="dato dest"><b>Para:</b> <span id="dPara"></span></div>
+    <div class="dato dest"><b>CC:</b> <span id="dCC"></span></div>
+
+    <button class="prim" id="btnLlenar">Llenar escalamiento</button>
+    <button id="btnRevisar">Revisar destinatarios antes de enviar</button>
+  </div>
+
+  <div id="resultado"></div>
+
+  <details id="config">
+    <summary>Configuración</summary>
+    <label for="analista">Tu nombre para "Analista SOC" (Apellidos, Nombres)</label>
+    <input type="text" id="analista" placeholder="Apellidos, Nombres">
+    <button id="btnAnalista">Guardar nombre</button>
+
+    <label for="archivos">Cargar matrices (un Excel por cliente, nombre del archivo = cliente)</label>
+    <input type="file" id="archivos" accept=".xlsx" multiple>
+    <div id="matricesInfo" class="dato" style="margin-top:6px"></div>
+    <button id="btnBorrar">Borrar todas las matrices cargadas</button>
+    <small>Las matrices y tu nombre se guardan solo en la configuración de este complemento en tu buzón.</small>
+  </details>
+
+  <script src="core.js"></script>
+  <script src="taskpane.js"></script>
+</body>
+</html>
